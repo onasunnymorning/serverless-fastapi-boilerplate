@@ -68,9 +68,9 @@ jobs:
         with:
           version: 1
         env:
-          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ env.AWS_DEFAULT_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ aws-dev.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ aws-dev.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ aws-dev.AWS_DEFAULT_REGION }}
 
       - name: Download Lambda api.zip
         uses: actions/download-artifact@v2
@@ -80,13 +80,13 @@ jobs:
       - name: Upload to S3
         run: aws s3 cp api.zip s3://fastapi-boilerplate-deploy/api.zip
         env:
-          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ env.AWS_DEFAULT_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ aws-dev.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ aws-dev.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ aws-dev.AWS_DEFAULT_REGION }}
 
       - name: Deploy new Lambda
         run: aws lambda update-function-code --function-name fastapi-boilerplate-function --s3-bucket fastapi-boilerplate-deploy --s3-key api.zip
         env:
-          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ env.AWS_DEFAULT_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ aws-dev.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ aws-dev.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ aws-dev.AWS_DEFAULT_REGION }}
