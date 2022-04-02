@@ -1,20 +1,23 @@
 name: CI/CD Pipeline
 
-on:
-  push:
-    branches: [ main ]
 
 inputs:
   AWS_ACCESS_KEY_ID:
-    description: "AWS Accees Key ID"
-    required: false
-    default: ""
+    description: "AWS Access Key ID"
+    required: true
+    default: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY:
     description: "AWS Secret Access Key"
     required: true
+    default: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_DEFAULT_REGION:
     description: "AWS Default Region"
     required: true
+    default: ${{ secrets.AWS_DEFAULT_REGION }}
+
+on:
+  push:
+    branches: [ main ]
 
 jobs:
 
