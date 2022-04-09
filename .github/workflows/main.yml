@@ -48,7 +48,7 @@ jobs:
 
       # Step 8
       - name: Add App to Zip file
-        run: zip -g ../../../../api.zip -r app
+        run: cd ./app && zip -g ../api.zip -r .
 
       # Step 9
       - name: Upload zip file artifact
