@@ -1,0 +1,4 @@
+.pytest_cache
+.serverless
+package-lock.json
+package.json
