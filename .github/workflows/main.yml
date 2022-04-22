@@ -6,7 +6,7 @@ on:
 
 jobs:
 
-  continuous-integration:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,7 +17,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.9
           architecture: x64
       # Step 3
       - name: Install Python Virtual ENV
@@ -40,54 +40,22 @@ jobs:
       - name: Activate venv and Run Test
         run: . venv/bin/activate && pytest
 
-      # Step 7
-      - name: Create Zipfile archive of Dependencies
-        run: |
-          cd ./venv/lib/python3.8/site-packages
-          zip -r9 ../../../../api.zip .
-
-      # Step 8
-      - name: Add App to Zip file
-        run: cd ./app && zip -g ../api.zip -r .
-
-      # Step 9
-      - name: Upload zip file artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: api
-          path: api.zip
-
-  continuous-deployment:
+  deploy:
+    name: deploy
     runs-on: ubuntu-latest
-    environment: aws-dev
-    needs: [continuous-integration]
-    if: github.ref == 'refs/heads/main'
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x]
     steps:
-
-      - name: Install AWS CLI
-        uses: unfor19/install-aws-cli-action@v1
-        with:
-          version: 1
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-
-      - name: Download Lambda api.zip
-        uses: actions/download-artifact@v2
-        with:
-          name: api
-
-      - name: Upload to S3
-        run: aws s3 cp api.zip s3://fastapi-boilerplate-deploy/api.zip
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-
-      - name: Deploy new Lambda
-        run: aws lambda update-function-code --function-name fastapi-boilerplate-function --s3-bucket fastapi-boilerplate-deploy --s3-key api.zip
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm ci
+    - name: serverless deploy
+      uses: serverless/github-action@v3
+      with:
+        args: deploy
+      env:
+        SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
